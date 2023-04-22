@@ -31,6 +31,18 @@ const StyledImg = styled.img`
   border-radius: 25px;
 `;
 
+const StyledNothingIsFound = styled.h1`
+  position: absolute;
+  text-align: center;
+  right: 40%;
+  left: 40%;
+
+  @media(max-width: 600px) {
+    right: 10%;
+    left: 10%;
+  };
+`;
+
 function App() {
   const options = {
     method: 'GET',
@@ -43,6 +55,7 @@ function App() {
 
   const [inputValue, setInputValue] = useState("");
   const [apiData, setApiData] = useState([]);
+  const [buttonState, setButtonState] = useState("not clicked");
 
   const apiUrl = `https://imdb8.p.rapidapi.com/auto-complete?q=${inputValue}`;
   let iterationCounter = -1;
@@ -53,10 +66,42 @@ function App() {
 
   const getApiResponse = async () => {
     const apiResponse = await fetch(apiUrl, options);
-
     const responseJSON = await apiResponse.json();
 
+    setButtonState("clicked");
     setApiData(responseJSON.d);
+  };
+
+  const imageChecker = (iterationParametr) => {
+    if (apiData[iterationParametr].hasOwnProperty("i") === true) {
+      return apiData[iterationParametr].i.imageUrl;
+    } else {
+      return "https://filestore.community.support.microsoft.com/api/images/ext?url=https%3A%2F%2Fanswerscdn.microsoft.com%2Fstatic%2Fimages%2Fimage-not-found.jpg"
+    };
+  };
+
+  const contentHandler = () => {
+    if (apiData.length !== 0 && buttonState === "clicked") {
+      return (
+        apiData.map(() => {
+          iterationCounter += 1;
+
+          return (
+            <StyledCard key={iterationCounter}>
+              <StyledImg src={imageChecker(iterationCounter)} alt="film poster"></StyledImg>
+              <h2>{apiData[iterationCounter].l}</h2>
+              <div>Year: {apiData[iterationCounter].y}</div>
+              <div>Type: {apiData[iterationCounter].qid}</div>
+              <div>In Main Roles: {apiData[iterationCounter].s}</div>
+            </StyledCard>
+          );
+        })
+      )
+    } else if (apiData.length === 0 && buttonState === "clicked") {
+      return (
+        <StyledNothingIsFound>Nothing is found</StyledNothingIsFound>
+      );
+    }
   };
 
   return (
@@ -66,19 +111,7 @@ function App() {
       buttonOnCLick={getApiResponse}
       />
       <StyledCardWrap>
-        {apiData.map(() => {
-          iterationCounter += 1;
-
-          return (
-            <StyledCard key={iterationCounter}>
-              <StyledImg src={apiData[iterationCounter].i.imageUrl} alt="film poster"></StyledImg>
-              <h2>{apiData[iterationCounter].l}</h2>
-              <div>Year: {apiData[iterationCounter].y}</div>
-              <div>Type: {apiData[iterationCounter].qid}</div>
-              <div>In Main Roles: {apiData[iterationCounter].s}</div>
-            </StyledCard>
-          );
-        })}
+        {contentHandler()}
       </StyledCardWrap>
     </div>
   );

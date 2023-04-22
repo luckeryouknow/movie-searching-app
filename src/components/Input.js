@@ -21,7 +21,6 @@ const StyledInput = styled.input`
   border: none;
   outline: none;
   border-radius: 50px;
-  background-color: #f5f5f8;
 `;
 
 const StyledButton = styled.button`
